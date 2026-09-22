@@ -266,6 +266,7 @@
       align-items: start;
     }
     .hero-card {
+      position: relative;
       container-type: inline-size;
       container-name: hero;
       background: var(--glass);
@@ -275,6 +276,25 @@
       box-shadow: 0 0 20px rgba(59, 130, 246, 0.25), inset 0 0 20px rgba(59, 130, 246, 0.08);
       min-width: 0;
     }
+
+    /* 「秘石の選び方」を開くボタン。カード右上に固定表示。 */
+    .tip-btn {
+      position: absolute; top: 0.5rem; right: 0.5rem; z-index: 4;
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      font: inherit; font-size: 0.75rem; font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(253, 224, 71, 0.55);
+      background: rgba(15, 23, 42, 0.65);
+      color: var(--gold);
+      cursor: pointer;
+      line-height: 1.4;
+    }
+    .tip-btn:hover { background: rgba(253, 224, 71, 0.18); }
+    .tip-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .tip-btn .q { display: inline-grid; place-content: center; width: 1rem; height: 1rem; border-radius: 50%; border: 1.5px solid currentColor; font-size: 0.6875rem; }
+    .tip-btn .label { display: none; }
+    @container hero (min-width: 15rem) { .tip-btn .label { display: inline; } }
 
     /* 英雄ヘッダー */
     .hero-head {
@@ -699,6 +719,55 @@
       resize: vertical;
     }
 
+    /* ---------- 秘石の選び方ドロワー（画面右側からスライド表示） ---------- */
+    #tipsdlg {
+      position: fixed; inset: 0 0 0 auto; margin: 0;
+      width: min(26rem, 92vw);
+      height: 100vh; height: 100dvh;
+      max-height: none;
+      border-radius: 0.75rem 0 0 0.75rem;
+      border-width: 0 0 0 1px;
+      animation: tip-in 0.18s ease-out;
+    }
+    #tipsdlg::backdrop { background: rgba(2, 6, 23, 0.6); }
+    @keyframes tip-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @media (prefers-reduced-motion: reduce) { #tipsdlg { animation: none; } }
+    #tipsdlg .dlg-body { padding: 1rem; height: 100%; overflow-y: auto; }
+    .tip-desc {
+      font-size: 0.9375rem; line-height: 1.7; color: var(--soft);
+      background: var(--panel); border: 1px solid var(--line); border-radius: 0.5rem;
+      padding: 0.6rem 0.75rem; margin-bottom: 1rem; white-space: pre-wrap;
+    }
+    .tip-desc.is-placeholder { color: var(--muted); font-style: italic; }
+
+    .tip-legend { display: flex; flex-wrap: wrap; gap: 0.35rem 0.6rem; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.6rem; }
+    .tip-legend b { color: var(--soft); }
+
+    .tip-table { display: grid; gap: 0.3rem; }
+    .tip-row {
+      --accent: var(--atk);
+      display: grid; grid-template-columns: 1fr auto;
+      align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.5rem;
+      background: var(--panel);
+      border-left: 3px solid var(--accent);
+      border-radius: 0.375rem;
+    }
+    .tip-row[data-kind="def"] { --accent: var(--def); }
+    .tip-row .stone-name { font-size: 0.875rem; font-weight: 600; }
+
+    .grade {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 2.75rem; padding: 0.15rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.02em;
+      color: #0b1220;
+      background: var(--g-color, #64748b);
+      filter: brightness(var(--g-bright, 1));
+    }
+    .grade.g-f  { background: transparent; border: 1px solid rgba(148, 163, 184, 0.4); color: var(--muted); font-weight: 600; }
+    .grade.g-na { background: transparent; border: 1px dashed rgba(148, 163, 184, 0.35); color: var(--muted); font-weight: 600; font-size: 0.75rem; }
+
     .toast {
       position: fixed; left: 50%; bottom: 1.25rem; z-index: 50;
       transform: translateX(-50%);
@@ -747,7 +816,7 @@
       <p>編成を選んで、3英雄のタイタン設定を並べて確認できます</p>
     </header>
 
-    <div id="notice" class="notice" hidden>表示中の構成は仮データです。下記スクリプトの TEAMS を書き換え、images フォルダに画像を置いてください。</div>
+    <div id="notice" class="notice" hidden>英雄画像・秘石画像が未設定です。images フォルダに画像を置くと自動で表示されます。</div>
 
     <main id="app" class="tool" data-mode="simple"></main>
     <noscript><p class="notice">このページの表示には JavaScript が必要です。</p></noscript>
@@ -759,6 +828,7 @@
     </details>
   </div>
 
+  <dialog id="tipsdlg" aria-labelledby="tip-title"><div class="dlg-body" id="tip-body"></div></dialog>
   <dialog id="picker" aria-labelledby="pk-title"><div class="dlg-body" id="pk-body"></div></dialog>
   <dialog id="jsonbox" aria-labelledby="jb-title">
     <div class="dlg-body">
@@ -775,7 +845,7 @@
    ========================================================= */
 
 // 仮データ表示のお知らせ。本番データに差し替えたら false にする
-const SHOW_SAMPLE_NOTICE = true;
+const SHOW_SAMPLE_NOTICE = false;
 
 /* ---------- 画像の置き場所 ----------
    英雄画像  : images/heroes/{英雄名}.png
@@ -791,7 +861,7 @@ const IMAGE_CONFIG = {
 /* ---------- スロット定義（元ツールの titanEffects / slotNames より） ----------
    effects: [効果名, 説明, 最大Lv]
    kind   : atk = 攻撃系 / def = 防御系（表示色の区別用） */
-const ATK_MAIN = [['戦場洞察','ダメ増バフ加算',7], ['衝撃','衰弱付与',3], ['灼熱','燃焼付与',3], ['磁場','磁気付与',3], ['破鎧','脆弱付与',3]];
+const ATK_MAIN = [['戦場洞察','ダメ増バフ加算',7], ['衝撃','衰弱付与',3], ['灼熱','燃焼付与',3], ['磁場','磁気付与',3], ['破凱','脆弱付与',3]];
 const DEF_MAIN = [['補足不能','ダメ減バフ加算',7], ['振動','衰弱強化',3], ['点火','燃焼強化',3], ['着磁','磁気強化',3], ['重撃','脆弱強化',3]];
 
 const SLOTS = [
@@ -818,38 +888,75 @@ const SLOTS = [
 const hero  = (name, builds, opts = {}) => ({ name, builds, ...opts });
 const build = (slots, label = 'おすすめ', note = '') => ({ label, note, slots });
 
-// ↓ 仮データ（レイアウト確認用）。実際のおすすめ構成に書き換えてください。
-const SAMPLE_A = [['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]];
-const SAMPLE_B = [['全軍突撃',7], ['破壊不能',7], ['衝撃',3], ['振動',3], ['灼熱',3], ['点火',3]];
-const SAMPLE_C = [['砲撃の嵐',7], ['鋼の奔流',7], ['磁場',3], ['着磁',3], ['破鎧',3], ['重撃',3]];
-const SAMPLE_D = [['全軍突撃',7], ['破壊不能',7], ['衝撃',3], ['振動',2], ['灼熱',3], null];
-
 const TEAMS = [
   // P1
-  [ hero('フランカ', [build(SAMPLE_A, '火力型'), build(SAMPLE_D, '耐久型', '専用5前提')]),
-    hero('ミヤ',     [build(SAMPLE_B)]),
-    hero('ルネ',     [build(SAMPLE_C)]) ],
+  [ hero('フランカ', [
+      build([['砲撃の嵐',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ１'),
+      build([['全軍突撃',7], ['振動',3], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], '衰弱ビルド'),
+      build([['全軍突撃',7], ['着磁',3], ['磁場',3], ['着磁',3], ['磁場',3], ['着磁',3]], '磁気ビルド')
+    ]),
+    hero('ミヤ', [build([['磁場',3], ['着磁',3], ['磁場',3], ['着磁',3], ['磁場',3], ['着磁',3]], 'おすすめ１')]),
+    hero('ルネ', [build([['全軍突撃',7], ['破壊不能',7], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], 'おすすめ１')]) ],
   // P2
-  [ hero('立華つむぎ', [build(SAMPLE_A)]),
-    hero('メル',       [build(SAMPLE_B)]),
-    hero('ミーチェ',   [build(SAMPLE_C)]) ],
+  [ hero('立華つむぎ', [build([['砲撃の嵐',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ１')]),
+    hero('メル',       [build([['戦場洞察',7], ['鋼の奔流',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ１')]),
+    hero('ミーチェ',   [build([['全軍突撃',7], ['破壊不能',7], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], 'おすすめ１')]) ],
   // P3
-  [ hero('アデル',   [build(SAMPLE_B)]),
-    hero('ソフィ',   [build(SAMPLE_C)]),
-    hero('マゼリア', [build(SAMPLE_A)]) ],
+  [ hero('アデル',   [build([['砲撃の嵐',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ１')]),
+    hero('ソフィ',   [build([['全軍突撃',7], ['鋼の奔流',7], ['灼熱',3], ['補足不能',7], ['灼熱',3], ['補足不能',7]], 'おすすめ１')]),
+    hero('マゼリア', [build([['全軍突撃',7], ['振動',3], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], 'おすすめ１')]) ],
   // P4
-  [ hero('マリナ',   [build(SAMPLE_C)]),
-    hero('ピスカ',   [build(SAMPLE_A)]),
-    hero('アイリス', [build(SAMPLE_B)]) ],
+  [ hero('マリナ',   [build([['砲撃の嵐',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ１')]),
+    hero('ピスカ',   [build([['全軍突撃',7], ['鋼の奔流',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ１')]),
+    hero('アイリス', [build([['全軍突撃',7], ['破壊不能',7], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], 'おすすめ１')]) ],
   // P5
-  [ hero('リヴィア（神秘）', [build(SAMPLE_A)]),
-    hero('ルチル',           [build(SAMPLE_B)]),
-    hero('ノルシュ',         [build(SAMPLE_C)]) ],
+  [ hero('リヴィア（神秘）', [build([['砲撃の嵐',7], ['点火',3], ['戦場洞察',7], ['点火',3], ['戦場洞察',7], ['点火',3]], 'おすすめ１')]),
+    hero('ルチル',           [build([['全軍突撃',7], ['鋼の奔流',7], ['灼熱',3], ['補足不能',7], ['灼熱',3], ['補足不能',7]], 'おすすめ１')]),
+    hero('ノルシュ',         [build([['全軍突撃',7], ['破壊不能',7], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], 'おすすめ１')]) ],
   // P6
-  [ hero('ギャビー',   [build(SAMPLE_B)]),
-    hero('ビスコット', [build(SAMPLE_C)]),
-    hero('フローリア', [build(SAMPLE_A)]) ]
+  [ hero('ギャビー',   [build([['砲撃の嵐',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ１')]),
+    hero('ビスコット', [build([['戦場洞察',7], ['鋼の奔流',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ１')]),
+    hero('フローリア', [build([['全軍突撃',7], ['破壊不能',7], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], 'おすすめ１')]) ]
 ];
+
+/* ---------- 秘石の評価表 ----------
+   STONE_ORDER: 評価表の行の並び順。
+   STONE_KIND : 攻撃系(atk) / 防御系(def) の色分け用（SLOTSの分類と対応）。
+   STONE_GRADES: { 英雄名: { 秘石名: 評価 } }。評価は S+ 〜 F、NA（対象外）。
+   ※ 頂いた表の「破鎧」は本ツールの効果名「破凱」（脆弱付与）と同一のものとして扱った。 */
+const STONE_ORDER = ['戦場洞察','補足不能','鋼の奔流','砲撃の嵐','全軍突撃','破壊不能','衝撃','磁場','灼熱','破凱','振動','着磁','点火','重撃'];
+const STONE_KIND = { '戦場洞察':'atk','補足不能':'def','鋼の奔流':'def','砲撃の嵐':'atk','全軍突撃':'atk','破壊不能':'def','衝撃':'atk','磁場':'atk','灼熱':'atk','破凱':'atk','振動':'def','着磁':'def','点火':'def','重撃':'def' };
+
+const GRADE_HERO_ORDER = ['フランカ','ミヤ','ルネ','立華つむぎ','メル','ミーチェ','アデル','ソフィ','マゼリア','マリナ','ピスカ','アイリス','リヴィア（神秘）','ルチル','ノルシュ','ギャビー','ビスコット','フローリア'];
+const GRADE_ROWS = {
+  '戦場洞察': ['B','B','B','B','B','B','B','B','B','B-','B-','B-','B-','B-','B-','B-','B-','B-'],
+  '補足不能': ['B','B','B','B','B','B','B','B','B','B-','B-','B-','B','B','B','B','B','B'],
+  '鋼の奔流': ['F','B','F','F','B+','F','F','B','F','F','B+','F','F','B+','F','F','B+','F'],
+  '砲撃の嵐': ['A','F','F','A','F','F','A-','F','F','A','F','F','A+','F','F','A+','F','F'],
+  '全軍突撃': ['A+','A','A-','F','F','A-','F','A','S-','F','A+','S-','F','A','A','F','F','A-'],
+  '破壊不能': ['F','F','A-','F','F','B+','F','F','B+','F','F','S+','F','F','A-','F','F','A-'],
+  '衝撃':     ['S','S','S','F','F','S','F','S','S','F','S','S','F','S','S','F','F','S'],
+  '磁場':     ['B','B+','B','F','F','C','F','A-','A-','F','B-','B-','F','C','C','F','F','B'],
+  '灼熱':     ['D','D','D','F','F','C','F','A-','A-','F','B-','B-','F','B+','B+','F','F','D'],
+  '破凱':     ['E','E','E','F','F','D','F','C','C','F','D','D','F','D-','D-','F','F','E'],
+  '振動':     ['NA','NA','NA','F','F','NA','A','NA','S+','F','NA','S','F','NA','NA','F','F','NA'],
+  '着磁':     ['C','S','NA','F','F','NA','F','NA','NA','F','NA','NA','F','NA','NA','F','F','NA'],
+  '点火':     ['NA','NA','NA','F','F','NA','F','NA','NA','F','NA','NA','S','B','C-','F','F','NA'],
+  '重撃':     ['NA','NA','NA','F','F','NA','F','B-','D','F','NA','NA','F','NA','NA','F','F','NA']
+};
+const STONE_GRADES = {};
+GRADE_HERO_ORDER.forEach((name, hi) => {
+  STONE_GRADES[name] = {};
+  STONE_ORDER.forEach(stone => { STONE_GRADES[name][stone] = GRADE_ROWS[stone][hi]; });
+});
+
+/* ---------- 秘石の選び方：説明文 ----------
+   ここに英雄名をキーとして説明文を書くと、ゲーム表示・シンプル表示どちらの
+   「？」ボタンからも同じ内容が表示される。未設定の英雄はプレースホルダーになる。
+   例: 'フランカ': '通常は砲撃の嵐型の全体バフが安定。対衰弱編成では衰弱ビルドに切り替える。' */
+const HERO_TIPS = {
+  // 'フランカ': '',
+};
 
 /* =========================================================
    状態（編集内容・表示形式）。ブラウザの localStorage に保存する
@@ -964,6 +1071,9 @@ function heroCardHTML(h, n, i, teamHasTabs) {
   const builds = list.map((b, k) => buildHTML(h, b, `P${n} ${h.name} ${b.label || k + 1}`)).join('');
   return `<article class="hero-card">
     ${radios}
+    <button type="button" class="tip-btn" data-tip="${esc(h.name)}" aria-label="${esc(h.name)}の秘石の選び方を開く">
+      <span class="q" aria-hidden="true">?</span><span class="label">秘石の選び方</span>
+    </button>
     <header class="hero-head">
       <span class="portrait"><span class="portrait-ph">${esc([...h.name][0])}</span><img src="${esc(heroImg(h))}" alt="" ${IMG_ATTR}></span>
       <div><h3 class="hero-name">${esc(h.name)}</h3>${h.note ? `<p class="hero-note">${esc(h.note)}</p>` : ''}</div>
@@ -1116,6 +1226,51 @@ picker.addEventListener('click', e => {
   }
 });
 
+/* ---------- 秘石の選び方ドロワー ---------- */
+const tipsDlg = document.getElementById('tipsdlg');
+
+// S+ 〜 F を色付け。基準色はランク(S/A/B/C/D/E)ごと、+/- で明るさを調整。
+const GRADE_TIER_COLOR = { S: '#fb7185', A: '#fb923c', B: '#4ade80', C: '#38bdf8', D: '#a78bfa', E: '#94a3b8' };
+function gradeBadge(grade) {
+  if (!grade || grade === 'NA') return `<span class="grade g-na">NA</span>`;
+  if (grade === 'F') return `<span class="grade g-f">F</span>`;
+  const tier = grade[0];
+  const suf = grade.slice(1);
+  const bright = suf === '+' ? 1.18 : suf === '-' ? 0.8 : 1;
+  const color = GRADE_TIER_COLOR[tier] || '#64748b';
+  return `<span class="grade" style="--g-color:${color};--g-bright:${bright}">${esc(grade)}</span>`;
+}
+
+function renderTips(name) {
+  const desc = HERO_TIPS[name];
+  const descHTML = desc
+    ? `<p class="tip-desc">${esc(desc)}</p>`
+    : `<p class="tip-desc is-placeholder">（${esc(name)}の秘石の選び方は準備中です。スクリプト内の HERO_TIPS に説明文を追加すると、ここに表示されます。）</p>`;
+
+  const grades = STONE_GRADES[name] || {};
+  const rows = STONE_ORDER.map(stone => `
+    <div class="tip-row" data-kind="${STONE_KIND[stone]}">
+      <span class="stone-name">${esc(stone)}</span>
+      ${gradeBadge(grades[stone])}
+    </div>`).join('');
+
+  document.getElementById('tip-body').innerHTML = `
+    <div class="dlg-head">
+      <span class="dlg-title" id="tip-title">${esc(name)}の秘石の選び方</span>
+      <button type="button" class="btn-sm" data-close>閉じる</button>
+    </div>
+    ${descHTML}
+    <p class="dlg-sub">秘石ごとの評価</p>
+    <div class="tip-legend"><b>S &gt; A &gt; B &gt; C &gt; D &gt; E</b>（高いほど優先）　<span class="grade g-f" style="min-width:auto">F</span>候補外　<span class="grade g-na" style="min-width:auto">NA</span>対象外</div>
+    <div class="tip-table">${rows}</div>`;
+}
+
+function openTips(name) { renderTips(name); tipsDlg.showModal(); }
+
+tipsDlg.addEventListener('click', e => {
+  if (e.target === tipsDlg || e.target.closest('[data-close]')) tipsDlg.close();
+});
+
 /* ---------- JSON コピー ----------
    出力は TEAMS にそのまま貼れる形式（slots は [効果名, Lv] / 未設定は null）。 */
 const EXPORT_LABEL = 'おすすめ';
@@ -1166,6 +1321,9 @@ document.getElementById('jsonbox').addEventListener('click', e => {
 
 /* ---------- イベント ---------- */
 document.addEventListener('click', e => {
+  const tipBtn = e.target.closest('.tip-btn');
+  if (tipBtn) { openTips(tipBtn.dataset.tip); return; }
+
   const editBtn = e.target.closest('.slot-edit');
   if (editBtn) { openPicker(editBtn.dataset.hero, parseInt(editBtn.dataset.slot, 10)); return; }
 
