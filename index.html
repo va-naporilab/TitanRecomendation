@@ -773,10 +773,10 @@
     .tip-sort { display: inline-flex; gap: 0.25rem; }
     .tip-sort button { font-size: 0.6875rem; padding: 0.15rem 0.5rem; }
 
-    .pk-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.4rem; }
+    .pk-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 0.4rem; }
     .pk-eff {
       --accent: var(--atk);
-      display: grid; grid-template-columns: 2.5rem 1fr; column-gap: 0.5rem; align-items: center;
+      display: grid; grid-template-columns: 2.5rem 1fr auto; column-gap: 0.5rem; align-items: center;
       text-align: left;
       font: inherit; color: var(--text);
       padding: 0.35rem 0.5rem 0.35rem 0.35rem;
@@ -790,12 +790,12 @@
     .pk-eff:hover { border-color: var(--line-strong); border-left-color: var(--accent); }
     .pk-eff[aria-pressed="true"] { background: #1e40af; border-color: var(--line-strong); border-left-color: var(--accent); }
     .pk-eff.pk-none { grid-template-columns: 1fr; text-align: center; color: var(--muted); border-left-color: var(--line); }
-    .pk-eff b { display: block; font-size: 0.9375rem; line-height: 1.2; }
-    .pk-eff small { display: block; font-size: 0.6875rem; color: var(--muted); line-height: 1.25; }
+    .pk-eff b { display: block; grid-column: 2; grid-row: 1; font-size: 0.9375rem; line-height: 1.2; }
+    .pk-eff small { display: block; grid-column: 2; grid-row: 2; font-size: 0.6875rem; color: var(--muted); line-height: 1.25; }
     .pk-eff[aria-pressed="true"] small { color: #bfdbfe; }
-    .pk-eff .pk-grade { grid-column: 2; justify-self: start; margin-top: 0.2rem; }
+    .pk-eff .pk-grade { grid-column: 3; grid-row: 1 / 3; align-self: center; justify-self: end; margin-top: 0; }
     .pk-thumb {
-      position: relative; grid-row: span 2;
+      position: relative; grid-column: 1; grid-row: 1 / 3;
       width: 2.5rem; height: 2.5rem;
       border-radius: 0.3rem; overflow: hidden;
       border: 1px dashed rgba(148, 163, 184, 0.4);
@@ -911,6 +911,17 @@
     .ref-slot li { display: flex; justify-content: space-between; gap: 0.5rem; }
     .ref-slot li span { color: var(--muted); text-align: right; }
 
+    .stone-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 0.6rem; padding-bottom: 0.5rem; }
+    .stone-info-card { --accent: var(--atk); background: var(--panel); border-left: 3px solid var(--accent); border-radius: 0.375rem; padding: 0.6rem 0.75rem; }
+    .stone-info-card[data-kind="def"] { --accent: var(--def); }
+    .stone-info-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+    .stone-info-name { font-size: 0.9375rem; font-weight: 700; color: var(--soft); }
+    .stone-info-desc { font-size: 0.8125rem; color: var(--muted); }
+    .stone-info-levels { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.4rem 0 0.5rem; }
+    .stone-info-lv { display: inline-flex; align-items: baseline; gap: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--line); border-radius: 0.3rem; padding: 0.1rem 0.4rem; font-size: 0.75rem; }
+    .stone-info-lv b { font-size: 0.6875rem; font-weight: 700; color: var(--line-strong); }
+    .stone-info-note { font-size: 0.8125rem; line-height: 1.6; color: var(--soft); white-space: pre-wrap; }
+
     @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
     @media (min-width: 720px) {
@@ -949,6 +960,12 @@
 
     <main id="app" class="tool" data-mode="simple"></main>
     <noscript><p class="notice">このページの表示には JavaScript が必要です。</p></noscript>
+
+    <details class="ref">
+      <summary>各秘石の説明・合成レベルと効果</summary>
+      <div class="ref-legend"><span data-kind="atk">攻撃系秘石</span><span data-kind="def">防御系秘石</span></div>
+      <div id="stone-info-grid" class="stone-info-grid"></div>
+    </details>
 
     <details class="ref">
       <summary>各部位につけれる秘石の一覧</summary>
@@ -994,8 +1011,8 @@ const ATK_MAIN = [['戦場洞察','ダメ増バフ加算',7], ['衝撃','衰弱�
 const DEF_MAIN = [['補足不能','ダメ減バフ加算',7], ['振動','衰弱強化',3], ['点火','燃焼強化',3], ['着磁','磁気強化',3], ['重撃','脆弱強化',3]];
 
 const SLOTS = [
-  { key: 'rifle',  label: 'ライフル', kind: 'atk', effects: [...ATK_MAIN, ['砲撃の嵐','攻撃強化の強化',7], ['全軍突撃','R1のみ追撃２回発動',7]] },
-  { key: 'armor',  label: 'アーマー', kind: 'def', effects: [...DEF_MAIN, ['鋼の奔流','開戦シールドの強化',7], ['破壊不能','鉄壁１ラウンド追加',7]] },
+  { key: 'rifle',  label: 'ライフル', kind: 'atk', effects: [['戦場洞察','ダメ増バフ加算',3], ...ATK_MAIN.slice(1), ['砲撃の嵐','攻撃強化の強化',7], ['全軍突撃','R1のみ追撃２回発動',7]] },
+  { key: 'armor',  label: 'アーマー', kind: 'def', effects: [['補足不能','ダメ減バフ加算',3], ...DEF_MAIN.slice(1), ['鋼の奔流','開戦シールドの強化',7], ['破壊不能','鉄壁１ラウンド追加',7]] },
   { key: 'vision', label: '視野',     kind: 'atk', effects: ATK_MAIN },
   { key: 'head',   label: 'ヘッドセット', kind: 'def', effects: DEF_MAIN },
   { key: 'handy',  label: 'ハンディGPS', kind: 'atk', effects: ATK_MAIN },
@@ -1020,22 +1037,22 @@ const build = (slots, label = 'おすすめ例', note = '') => ({ label, note, s
 const TEAMS = [
   // P1
   [ hero('フランカ', [
-      build([['砲撃の嵐',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１'),
+      build([['砲撃の嵐',7], ['補足不能',3], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１'),
       build([['全軍突撃',7], ['振動',3], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], '衰弱ビルド'),
       build([['全軍突撃',7], ['着磁',3], ['磁場',3], ['着磁',3], ['磁場',3], ['着磁',3]], '磁気ビルド')
     ]),
     hero('ミヤ', [build([['磁場',3], ['着磁',3], ['磁場',3], ['着磁',3], ['磁場',3], ['着磁',3]], 'おすすめ例１')]),
     hero('ルネ', [build([['全軍突撃',7], ['破壊不能',7], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], 'おすすめ例１')]) ],
   // P2
-  [ hero('立華つむぎ', [build([['砲撃の嵐',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
-    hero('メル',       [build([['戦場洞察',7], ['鋼の奔流',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
+  [ hero('立華つむぎ', [build([['砲撃の嵐',7], ['補足不能',3], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
+    hero('メル',       [build([['戦場洞察',3], ['鋼の奔流',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
     hero('ミーチェ',   [build([['全軍突撃',7], ['破壊不能',7], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], 'おすすめ例１')]) ],
   // P3
-  [ hero('アデル',   [build([['砲撃の嵐',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
+  [ hero('アデル',   [build([['砲撃の嵐',7], ['補足不能',3], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
     hero('ソフィ',   [build([['全軍突撃',7], ['鋼の奔流',7], ['灼熱',3], ['補足不能',7], ['灼熱',3], ['補足不能',7]], 'おすすめ例１')]),
     hero('マゼリア', [build([['全軍突撃',7], ['振動',3], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], 'おすすめ例１')]) ],
   // P4
-  [ hero('マリナ',   [build([['砲撃の嵐',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
+  [ hero('マリナ',   [build([['砲撃の嵐',7], ['補足不能',3], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
     hero('ピスカ',   [build([['全軍突撃',7], ['鋼の奔流',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
     hero('アイリス', [build([['全軍突撃',7], ['破壊不能',7], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], 'おすすめ例１')]) ],
   // P5
@@ -1043,8 +1060,8 @@ const TEAMS = [
     hero('ルチル',           [build([['全軍突撃',7], ['鋼の奔流',7], ['灼熱',3], ['補足不能',7], ['灼熱',3], ['補足不能',7]], 'おすすめ例１')]),
     hero('ノルシュ',         [build([['全軍突撃',7], ['破壊不能',7], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], 'おすすめ例１')]) ],
   // P6
-  [ hero('ギャビー',   [build([['砲撃の嵐',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
-    hero('ビスコット', [build([['戦場洞察',7], ['鋼の奔流',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
+  [ hero('ギャビー',   [build([['砲撃の嵐',7], ['補足不能',3], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
+    hero('ビスコット', [build([['戦場洞察',3], ['鋼の奔流',7], ['戦場洞察',7], ['補足不能',7], ['戦場洞察',7], ['補足不能',7]], 'おすすめ例１')]),
     hero('フローリア', [build([['全軍突撃',7], ['破壊不能',7], ['衝撃',3], ['振動',3], ['衝撃',3], ['振動',3]], 'おすすめ例１')]) ]
 ];
 
@@ -1056,19 +1073,52 @@ const TEAMS = [
 const STONE_ORDER = ['戦場洞察','補足不能','鋼の奔流','砲撃の嵐','全軍突撃','破壊不能','衝撃','磁場','灼熱','破鎧','振動','着磁','点火','重撃'];
 const STONE_KIND = { '戦場洞察':'atk','補足不能':'def','鋼の奔流':'def','砲撃の嵐':'atk','全軍突撃':'atk','破壊不能':'def','衝撃':'atk','磁場':'atk','灼熱':'atk','破鎧':'atk','振動':'def','着磁':'def','点火':'def','重撃':'def' };
 
+/* ---------- 秘石ごとの説明・合成レベルと効果 ----------
+   STONE_INFO: { 秘石名: { desc: 効果説明, levels: [Lv1〜Lv7の効果値（未使用Lvは''）], note: 運用について } } */
+const STONE_INFO = {
+  '戦場洞察': { desc: 'ダメ増バフの加算', levels: [10, 15, 20, 25, 30, 35, 40],
+    note: '最も無難で堅実なバフ効果。誰にでもつけれて入手もしやすい。無課金などでダメ増減低い人ほど恩恵が大きい。ライフルに着けるとLv3までしか合成できない点に注意。困ったらとりあえずLv1でつけておこう。合成はコスパが下がるので育成状況を見ながら。' },
+  '補足不能': { desc: 'ダメ減バフの加算', levels: [10, 15, 20, 25, 30, 35, 40],
+    note: '最も無難で堅実なバフ効果。誰にでもつけれて入手もしやすい。無課金などでダメ増減低い人ほど恩恵が大きい。アーマーに着けるとLv3までしか合成できない点に注意。困ったらとりあえずLv1でつけておこう。合成はコスパが下がるので育成状況を見ながら。' },
+  '鋼の奔流': { desc: '開戦シールド効果の強化', levels: [4, 7, 11, 15, 20, 25, 30],
+    note: '開戦シールド持ち英雄のみ有効。低レベルだと数値が高くないので補足不能と大差ない。合成していくことで真価を発揮。' },
+  '砲撃の嵐': { desc: '攻撃強化効果の強化', levels: [4, 7, 11, 15, 20, 25, 30],
+    note: '攻撃強化持ち英雄のみ有効。攻撃強化は１英雄に依存することが多いので、レベルが上がればかなり強力。つける英雄を絞って合成していきたい。' },
+  '全軍突撃': { desc: 'アクティブスキルの再発動（指定のダメージ割合でラウンド１のみ）', levels: [15, 18, 22, 27, 33, 40, 50],
+    note: 'アクティブスキル持ち英雄のみ有効。初ラウンドのみの低火力再発動自体はそれほど強くない。再発動によって付与系秘石の効果や英雄アクティブスキルの付属効果を再発動できるのが大きい。高Lvに出来ない限り合成のうまみは小さいので、いろんな英雄にLv1でつけて他秘石を節約するのもあり。' },
+  '破壊不能': { desc: '鉄壁効果を1ラウンド追加（追加される鉄壁効果は指定割合の値）', levels: [15, 18, 22, 27, 33, 40, 50],
+    note: '鉄壁持ち英雄のみ有効。低レベルではラウンド３のみの低倍率鉄壁自体は劇的な効果はない。ただ、鉄壁の有無が英雄スキルに影響することがあるので、いろんな鉄壁英雄にLv1でつけて他秘石を節約するのもあり。' },
+  '衝撃': { desc: '衰弱を付与する', levels: ['15％×1', '30％×1', '30％×2'],
+    note: '付与系の秘石。アクティブスキル持ち英雄のみ有効。衰弱効果はとても強力なので最強格の秘石。合成で効果が倍々になるので場所を選びつつ積極的に合成したい。' },
+  '磁場': { desc: '磁気を付与する', levels: ['15％×1', '30％×1', '30％×2'],
+    note: '付与系の秘石。アクティブスキル持ち英雄のみ有効。合成で効果が倍々になるので場所を選びつつ積極的に合成したい。Lv3になればダメ増減と同等以上の強さになることも。' },
+  '灼熱': { desc: '燃焼を付与する', levels: ['15％×1', '30％×1', '30％×2'],
+    note: '付与系の秘石。アクティブスキル持ち英雄のみ有効。合成で効果が倍々になるので場所を選びつつ積極的に合成したい。Lv3になればダメ増減と同等以上の強さになることも。' },
+  '破鎧': { desc: '脆弱を付与する', levels: ['15％×1', '30％×1', '30％×2'],
+    note: '付与系の秘石。アクティブスキル持ち英雄のみ有効。脆弱効果は他の効果と比べて弱いので１軍運用はお勧めしない。合成で効果が倍々になるので場所を選びつつ積極的に合成したい。' },
+  '振動': { desc: '衰弱の効果があれば強化する', levels: ['15％', '22％', '30％'],
+    note: '効果強化系の秘石。つけた英雄の英雄固有スキルの衰弱効果と【衝撃】の効果を増幅するもので、単独では無意味な効果。また、強化対象となる英雄固有スキルがないなら、最大でも【衝撃】の90％（衝撃を３つつけた場合）分の強さにしかならない。それでも【衝撃】が強いので一緒に使いたい秘石。マゼリアなどの強力な衰弱持ちに着けるととても強い。' },
+  '着磁': { desc: '磁気の効果があれば強化する', levels: ['15％', '22％', '30％'],
+    note: '効果強化系の秘石。つけた英雄の英雄固有スキルの磁気効果と【磁場】の効果を増幅するもので、単独では無意味な効果。また、強化対象となる英雄固有スキルがないなら、最大でも【磁場】の90％（磁場を３つつけた場合）分の強さにしかならない。ミヤなどの強力な磁気持ちに着けると強い。' },
+  '点火': { desc: '燃焼の効果があれば強化する', levels: ['15％', '22％', '30％'],
+    note: '効果強化系の秘石。つけた英雄の英雄固有スキルの燃焼効果と【灼熱】の効果を増幅するもので、単独では無意味な効果。また、強化対象となる英雄固有スキルがないなら、最大でも【灼熱】の90％（灼熱を３つつけた場合）分の強さにしかならない。リヴィアなどの強力な燃焼持ちに着けると強い。' },
+  '重撃': { desc: '脆弱の効果があれば強化する', levels: ['15％', '22％', '30％'],
+    note: '効果強化系の秘石。つけた英雄の英雄固有スキルの脆弱効果と【破鎧】の効果を増幅するもので、単独では無意味な効果。また、強化対象となる英雄固有スキルがないなら、最大でも【破鎧】の90％（破鎧を３つつけた場合）分の強さにしかならない。ソフィなどの大量に脆弱をばらまく英雄に着けるのはありだが、基本的に弱いのであまり使いたくない秘石。' }
+};
+
 const GRADE_HERO_ORDER = ['フランカ','ミヤ','ルネ','立華つむぎ','メル','ミーチェ','アデル','ソフィ','マゼリア','マリナ','ピスカ','アイリス','リヴィア（神秘）','ルチル','ノルシュ','ギャビー','ビスコット','フローリア'];
 const GRADE_ROWS = {
   '戦場洞察': ['B','B','B','B','B','B','B','B','B','B-','B-','B-','B-','B-','B-','B-','B-','B-'],
   '補足不能': ['B','B','B','B','B','B','B','B','B','B-','B-','B-','B','B','B','B','B','B'],
   '鋼の奔流': ['F','B','F','F','B+','F','F','B','F','F','B+','F','F','B+','F','F','B+','F'],
   '砲撃の嵐': ['A','F','F','A','F','F','A-','F','F','A','F','F','A+','F','F','A+','F','F'],
-  '全軍突撃': ['A+','A','A-','F','F','A-','F','A','S-','F','A+','S-','F','A','A','F','F','A-'],
+  '全軍突撃': ['A+','A','A-','F','F','A-','F','A-','A+','F','A+','A+','F','A-','A','F','F','A-'],
   '破壊不能': ['F','F','A-','F','F','B+','F','F','B+','F','F','S+','F','F','A-','F','F','A-'],
   '衝撃':     ['S','S','S','F','F','S','F','S','S','F','S','S','F','S','S','F','F','S'],
   '磁場':     ['B','B+','B','F','F','C','F','B+','B+','F','B-','B-','F','C','C','F','F','B'],
   '灼熱':     ['D','D','D','F','F','C','F','B+','B+','F','B-','B-','F','B+','B+','F','F','D'],
   '破鎧':     ['E','E','E','F','F','D','F','C','C','F','D','D','F','D-','D-','F','F','E'],
-  '振動':     ['NA','NA','NA','F','F','NA','A','NA','S+','F','NA','S','F','NA','NA','F','F','NA'],
+  '振動':     ['NA','NA','NA','F','F','NA','A-','NA','S+','F','NA','S','F','NA','NA','F','F','NA'],
   '着磁':     ['C','S','NA','F','F','NA','F','NA','NA','F','NA','NA','F','NA','NA','F','F','NA'],
   '点火':     ['NA','NA','NA','F','F','NA','F','NA','NA','F','NA','NA','S','B','C-','F','F','NA'],
   '重撃':     ['NA','NA','NA','F','F','NA','F','B-','D','F','NA','NA','F','NA','NA','F','F','NA']
@@ -1266,6 +1316,20 @@ function render() {
       <ul>${def.effects.map(([name, desc, max]) => `<li>${esc(name)}<span>${esc(desc)}（〜Lv${max}）</span></li>`).join('')}</ul>
     </div>`).join('');
 
+  document.getElementById('stone-info-grid').innerHTML = STONE_ORDER.map(stone => {
+    const info = STONE_INFO[stone] || {};
+    const lvHTML = (info.levels || []).map((v, i) => v === '' || v == null ? '' : `<span class="stone-info-lv"><b>Lv${i + 1}</b>${esc(String(v))}</span>`).join('');
+    return `
+    <div class="stone-info-card" data-kind="${STONE_KIND[stone]}">
+      <div class="stone-info-head">
+        <span class="stone-info-name">${esc(stone)}</span>
+        <span class="stone-info-desc">${esc(info.desc || '')}</span>
+      </div>
+      <div class="stone-info-levels">${lvHTML}</div>
+      <p class="stone-info-note">${esc(info.note || '')}</p>
+    </div>`;
+  }).join('');
+
   document.getElementById('notice').hidden = !SHOW_SAMPLE_NOTICE;
   setMode(store.get(STORAGE.mode, 'simple'), false);
 }
@@ -1329,10 +1393,13 @@ function renderPicker() {
 
   const prevKey = document.activeElement && picker.contains(document.activeElement) ? document.activeElement.dataset.pk : null;
 
-  const effBtns = def.effects.map(([name, desc]) => `
+  const effList = [...def.effects].sort((a, b) =>
+    gradeScore(pickerGrade(def.key, a[0], (STONE_GRADES[pk.hero] || {})[a[0]])) -
+    gradeScore(pickerGrade(def.key, b[0], (STONE_GRADES[pk.hero] || {})[b[0]])));
+  const effBtns = effList.map(([name, desc]) => `
     <button type="button" class="pk-eff" data-kind="${def.kind}" data-pk="eff:${esc(name)}" data-eff="${esc(name)}" aria-pressed="${name === curEff}">
       <span class="pk-thumb"><span class="slot-ph">${icon(def.key)}</span><img src="${esc(effectImg(name))}" alt="" ${IMG_ATTR}></span>
-      <b>${esc(name)}</b><small>${esc(desc)}</small>${gradeBadge((STONE_GRADES[pk.hero] || {})[name], 'pk-grade')}
+      <b>${esc(name)}</b><small>${esc(desc)}</small>${gradeBadge(pickerGrade(def.key, name, (STONE_GRADES[pk.hero] || {})[name]), 'pk-grade')}
     </button>`).join('');
   const lvBtns = max
     ? Array.from({ length: max }, (_, i) => `<button type="button" data-pk="lv:${i + 1}" data-lv="${i + 1}" aria-pressed="${i + 1 === curLv}">Lv${i + 1}</button>`).join('')
@@ -1399,6 +1466,27 @@ function gradeScore(grade) {
   const suf = grade.slice(1);
   const sufScore = suf === '+' ? 0 : suf === '-' ? 2 : 1;
   return tierScore * 10 + sufScore;
+}
+
+// 評価を一段階下げる（S+→S→S-→A+→…→E-→F の順で1段下げる）。
+// ライフルの「戦場洞察」／アーマーの「補足不能」は、Lv上限が他スロットより低いぶん評価を下げて表示する。
+const GRADE_TIER_ORDER = ['S', 'A', 'B', 'C', 'D', 'E'];
+function stepDownGrade(grade) {
+  if (!grade || grade === 'F' || grade === 'NA') return grade;
+  const tier = grade[0];
+  const suf = grade.slice(1);
+  const tierIdx = GRADE_TIER_ORDER.indexOf(tier);
+  if (tierIdx === -1) return grade;
+  if (suf === '+') return tier;
+  if (suf === '') return tier + '-';
+  const nextTier = GRADE_TIER_ORDER[tierIdx + 1];
+  return nextTier ? nextTier + '+' : 'F';
+}
+
+// 秘石選択画面で表示する評価。ライフルの戦場洞察／アーマーの補足不能のみ一段階下げる。
+function pickerGrade(slotKey, stoneName, grade) {
+  const downgrade = (slotKey === 'rifle' && stoneName === '戦場洞察') || (slotKey === 'armor' && stoneName === '補足不能');
+  return downgrade ? stepDownGrade(grade) : grade;
 }
 
 let tipSortMode = 'grade';   // 'grade' = 評価が高い順（S~E > NA > F） / 'slot' = 部位の並び順（既定）
