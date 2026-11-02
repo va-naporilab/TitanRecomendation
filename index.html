@@ -39,7 +39,7 @@
       --atk: #fb923c;   /* 攻撃系スロット（ライフル・視野・ハンディ） */
       --def: #38bdf8;   /* 防御系スロット（アーマー・ヘッド・ブーツ） */
       --img-ratio: 1 / 1;  /* タイタン画像の縦横比。画像に合わせて変更（例: 4 / 3） */
-      --img-wide: 4.5rem;  /* カードが広いときの画像の幅 */
+      --img-wide: 3.75rem;  /* カードが広いときの画像の幅 */
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -476,7 +476,7 @@
       --accent: var(--atk);
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      grid-template-areas: "name" "img" "eff" "lv";
+      grid-template-areas: "name" "img" "eff";
       justify-items: center;
       row-gap: 0.25rem;
       padding: 0.4rem 0.3rem;
@@ -530,24 +530,29 @@
     .slot-img.has-img .slot-ph { display: none; }
 
     .slot-eff { grid-area: eff; min-width: 0; }
-    .slot-eff b { display: block; font-size: 0.9375rem; font-weight: 700; line-height: 1.25; }
+    .slot-eff b { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; column-gap: 0.4rem; font-size: 0.9375rem; font-weight: 700; line-height: 1.25; }
+    .eff-name { min-width: 0; }
     .slot-eff small { display: block; font-size: 0.6875rem; line-height: 1.3; color: var(--muted); min-height: 2.6em; }
 
-    .slot-lv { grid-area: lv; display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
-    .lv-num { font-size: 0.875rem; font-weight: 700; color: var(--accent); line-height: 1; }
-    .pips { display: flex; gap: 2px; }
-    .pips i { width: 0.5rem; height: 0.25rem; border-radius: 1px; background: rgba(148, 163, 184, 0.3); }
-    .pips i.on { background: var(--accent); }
+    /* 秘石画像とその直下の★をひとまとめにする */
+    .slot-media { grid-area: img; display: flex; flex-direction: column; align-items: center; gap: 0.15rem; width: 100%; min-width: 0; }
+    .slot-media .slot-img { width: 100%; }
+    .lv-num { flex: none; font-size: 0.75rem; font-weight: 700; color: var(--accent); line-height: 1; }
+    /* Lv表示：★。星1つにつきLv2段階分（輪郭が光る → 完全に点灯）。最大Lv7なら星3つ、Lv3なら星1つ。 */
+    .pips { display: flex; gap: 1px; }
+    .pips svg.st { width: 0.8rem; height: 0.8rem; display: block; overflow: visible; }
+    .pips .star { fill: #57534e; stroke: #292524; stroke-width: 1; stroke-linejoin: round; }
+    .pips .star.half { fill: url(#star-grad-half); stroke: #f59e0b; stroke-width: 1; filter: drop-shadow(0 0 1px rgba(245, 158, 11, 0.45)); }
+    .pips .star.full { fill: url(#star-grad); stroke: #f59e0b; stroke-width: 1; filter: drop-shadow(0 0 2px rgba(250, 204, 21, 0.8)); }
 
     .slot.is-empty .slot-eff b { color: var(--muted); font-weight: 500; }
-    .slot.is-empty .slot-lv { visibility: hidden; }
 
     /* ---------- シンプル表示：狭い幅（スマホの3列表示など）でのデフォルト ----------
        17rem 未満のカードでは、横並びは保ちつつ画像を小さく・Lv表示を省略して、
        6スロット×3英雄がスマホの画面縦幅にも収まりやすい高さにする。
        17rem 以上のときは下の @container ブロックで通常サイズに戻す。 */
     .tool[data-mode="simple"] .slot {
-      grid-template-columns: 2.5rem minmax(0, 1fr);
+      grid-template-columns: 2.25rem minmax(0, 1fr);
       grid-template-areas: "img name" "img eff";
       justify-items: start;
       align-items: center;
@@ -556,31 +561,34 @@
       padding: 0.26rem 0.4rem 0.26rem 0.3rem;
       text-align: left;
     }
-    .tool[data-mode="simple"] .slot-img { max-width: 2.5rem; }
+    .tool[data-mode="simple"] .slot-media { align-items: flex-start; }
+    .tool[data-mode="simple"] .slot-img { max-width: 2.25rem; }
+    .tool[data-mode="simple"] .pips { gap: 0; }
+    .tool[data-mode="simple"] .pips svg.st { width: 0.8rem; height: 0.8rem; }
     .tool[data-mode="simple"] .slot-name {
       font-size: 0.625rem; justify-content: flex-start; flex-wrap: nowrap;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .tool[data-mode="simple"] .slot-name .ico { width: 0.75rem; height: 0.75rem; }
     .tool[data-mode="simple"] .slot-eff b {
-      font-size: 0.875rem;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-size: 0.875rem; flex-wrap: nowrap; justify-content: flex-start; column-gap: 0.3rem;
     }
+    .tool[data-mode="simple"] .eff-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tool[data-mode="simple"] .lv-num { font-size: 0.625rem; }
     .tool[data-mode="simple"] .slot-eff small {
       font-size: 0.5625rem; min-height: 0; line-height: 1.2;
       display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
     }
-    .tool[data-mode="simple"] .slot-lv { display: none; }   /* 横幅が足りないので省略（「自分で選ぶ」なら枠を押せばLvを確認・変更できる） */
 
     /* ---------- シンプル表示：カードが広いとき、画像・Lv表示を通常サイズに戻す ---------- */
     @container hero (min-width: 17rem) {
       .tool[data-mode="simple"] .hero-name { font-size: 1.25rem; }
 
       .tool[data-mode="simple"] .slot {
-        grid-template-columns: var(--img-wide) minmax(0, 1fr) auto;
+        grid-template-columns: var(--img-wide) minmax(0, 1fr);
         grid-template-areas:
-          "img name lv"
-          "img eff  lv";
+          "img name"
+          "img eff";
         column-gap: 0.75rem;
         row-gap: 0.1rem;
         padding: 0.4rem 0.6rem 0.4rem 0.4rem;
@@ -591,17 +599,16 @@
         white-space: normal; overflow: visible; text-overflow: clip;
       }
       .tool[data-mode="simple"] .slot-name .ico { width: 1rem; height: 1rem; }
-      .tool[data-mode="simple"] .slot-eff b {
-        font-size: 1.0625rem;
-        white-space: normal; overflow: visible; text-overflow: clip;
-      }
+      .tool[data-mode="simple"] .slot-eff b { font-size: 1.0625rem; flex-wrap: wrap; }
+      .tool[data-mode="simple"] .eff-name { white-space: normal; overflow: visible; text-overflow: clip; }
       .tool[data-mode="simple"] .slot-eff small {
         font-size: 0.625rem; -webkit-line-clamp: unset; display: block; overflow: visible;
       }
       .tool[data-mode="simple"] .build-tabs { display: flex; justify-content: center; min-height: 1.4rem; }
-      .tool[data-mode="simple"] .slot-lv { display: flex; align-items: flex-end; gap: 0.3rem; }
-      .tool[data-mode="simple"] .lv-num { font-size: 0.9375rem; }
-      .tool[data-mode="simple"] .pips i { width: 0.6rem; }
+      .tool[data-mode="simple"] .slot-media { align-items: center; }
+      .tool[data-mode="simple"] .slot-img { max-width: none; width: 100%; }
+      .tool[data-mode="simple"] .lv-num { font-size: 0.8125rem; }
+      .tool[data-mode="simple"] .pips svg.st { width: 0.9rem; height: 0.9rem; }
     }
 
     /* =========================================================
@@ -617,7 +624,7 @@
        幅は object-fit: contain でその高さに追従させる（幅に無理に合わせない）。
        画面が十分広いときだけ中央カラムが伸びる。狭い画面ではこのカードの
        最小幅を下回った分だけ横スクロールになる。 */
-    .tool[data-mode="game"] { --show: contents; --game-side-w: 5rem; }
+    .tool[data-mode="game"] { --show: contents; --game-side-w: 4.25rem; }
     .tool[data-mode="game"] .team-panel { max-width: 36rem; margin-inline: auto; overflow-x: auto; }
     .tool[data-mode="game"] .hero-grid {
       grid-auto-flow: row;
@@ -724,7 +731,7 @@
     .tool[data-mode="game"] .slot:nth-child(3), .tool[data-mode="game"] .slot:nth-child(6) { grid-row: 4; }
 
     .tool[data-mode="game"] .slot {
-      grid-template-areas: "img" "eff" "lv";
+      grid-template-areas: "img" "eff";
       row-gap: 0.2rem;
       padding: 0.35rem 0.2rem;
       background: none;
@@ -742,10 +749,9 @@
       box-shadow: inset 0 0 12px rgba(34, 211, 238, 0.25);
     }
     .tool[data-mode="game"] .slot-img.has-img { border-style: solid; }
-    .tool[data-mode="game"] .slot-eff b { font-size: 0.875rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tool[data-mode="game"] .slot-eff b { font-size: 0.875rem; font-weight: 800; column-gap: 0.25rem; }
     .tool[data-mode="game"] .slot-eff small { display: none; }
-    .tool[data-mode="game"] .slot.is-empty .slot-lv { display: none; }
-    .tool[data-mode="game"] .lv-num { font-size: 0.9375rem; }
+    .tool[data-mode="game"] .lv-num { font-size: 0.6875rem; }
 
     .tool[data-mode="game"] .build-foot { grid-column: 1 / -1; grid-row: 5; margin-top: 0.25rem; }
     .tool[data-mode="game"] .edit-bar { border-color: rgba(253, 224, 71, 0.6); background: rgba(8, 47, 73, 0.6); }
@@ -951,6 +957,7 @@
   </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="star-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fde047"/><stop offset="1" stop-color="#f59e0b"/></linearGradient><radialGradient id="star-grad-half" cx="50%" cy="55%" r="55%"><stop offset="0" stop-color="#f59e0b" stop-opacity="0.6"/><stop offset="0.55" stop-color="#b45309" stop-opacity="0.45"/><stop offset="1" stop-color="#44403c" stop-opacity="0.9"/></radialGradient></defs></svg>
   <div class="container">
     <header class="header">
       <h1>タイタン秘石 おすすめ構成例と解説</h1>
@@ -1233,6 +1240,19 @@ const effectImg = (name, override) => override || `${IMAGE_CONFIG.effectDir}${en
 // 画像の読み込み結果に応じて、プレースホルダーを出し分ける
 const IMG_ATTR = 'loading="lazy" onload="this.parentNode.classList.add(\'has-img\')" onerror="this.remove()"';
 
+// Lv表示用の★。星1つ＝Lv2段階分。Lv1は全て暗い星、Lv2で1つ目の輪郭が光り、Lv3で1つ目が点灯…
+// 星の数 = ceil((最大Lv-1)/2)（最大Lv7→3つ、Lv3→1つ）。最大Lvで全ての星が点灯する。
+const STAR_PATH = 'M12 2.5l2.9 6.1 6.7.9-4.9 4.6 1.2 6.6L12 17.4l-5.9 3.3 1.2-6.6L2.4 9.5l6.7-.9z';
+function starsHTML(lv, max) {
+  const count = Math.max(1, Math.ceil((max - 1) / 2));
+  const stars = Array.from({ length: count }, (_, i) => {
+    const step = (lv - 1) - i * 2;
+    const cls = step >= 2 ? 'full' : step === 1 ? 'half' : '';
+    return `<svg class="st" viewBox="0 0 24 24"><path class="star ${cls}" d="${STAR_PATH}"/></svg>`;
+  }).join('');
+  return stars;
+}
+
 // edit = 編集できる枠のとき { hero, idx }
 function slotHTML(def, entry, where, edit) {
   const [effName, rawLv, imgOverride] = entry || [];
@@ -1248,18 +1268,20 @@ function slotHTML(def, entry, where, edit) {
       <span class="slot-name">${icon(def.key)}${esc(def.label)}</span>
       <span class="slot-img"><span class="slot-ph">${icon(def.key)}</span></span>
       <span class="slot-eff"><b>${effName ? esc(effName) + '（不明）' : '未設定'}</b><small></small></span>
-      <span class="slot-lv"></span>${editBtn}
+      ${editBtn}
     </li>`;
   }
   const [name, desc, max] = eff;
   const lv = Math.min(Math.max(parseInt(rawLv, 10) || 1, 1), max);
   if (lv !== rawLv) console.warn(`[${where}] 「${name}」のLvは 1〜${max} です（指定: ${rawLv}）`);
-  const pips = Array.from({ length: max }, (_, i) => `<i${i < lv ? ' class="on"' : ''}></i>`).join('');
+  const pips = starsHTML(lv, max);
   return `<li class="slot${editAttrs}" data-kind="${def.kind}" title="${esc(def.label)}：${esc(name)} Lv${lv}">
     <span class="slot-name">${icon(def.key)}${esc(def.label)}</span>
-    <span class="slot-img"><span class="slot-ph">${icon(def.key)}</span><img src="${esc(effectImg(name, imgOverride))}" alt="${esc(name)}" ${IMG_ATTR}></span>
-    <span class="slot-eff"><b>${esc(name)}</b><small>${esc(desc)}</small></span>
-    <span class="slot-lv"><span class="lv-num">Lv${lv}</span><span class="pips" aria-hidden="true">${pips}</span></span>${editBtn}
+    <span class="slot-media">
+      <span class="slot-img"><span class="slot-ph">${icon(def.key)}</span><img src="${esc(effectImg(name, imgOverride))}" alt="${esc(name)}" ${IMG_ATTR}></span>
+      <span class="pips" aria-hidden="true">${pips}</span>
+    </span>
+    <span class="slot-eff"><b><span class="eff-name">${esc(name)}</span><span class="lv-num">Lv${lv}</span></b><small>${esc(desc)}</small></span>${editBtn}
   </li>`;
 }
 
