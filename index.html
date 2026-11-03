@@ -195,7 +195,29 @@
       margin-bottom: 0.75rem;
     }
     .filter-label { font-size: 0.8125rem; font-weight: 600; color: var(--muted); }
-    .hero-filter .copy-team { margin-left: auto; }
+    .filter-actions { margin-left: auto; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    /* テキスト貼り付けからの復元ボックス（ボタンを押すまで非表示） */
+    .restore-box {
+      display: grid; gap: 0.5rem;
+      margin-bottom: 0.75rem; padding: 0.65rem 0.75rem;
+      background: var(--panel); border: 1px solid var(--line-strong); border-radius: 0.5rem;
+    }
+    .restore-box[hidden] { display: none; }
+    .restore-box .restore-hint { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+    .restore-box .json-text { min-height: 9rem; }
+    .restore-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end; }
+    .restore-msg { font-size: 0.8125rem; line-height: 1.5; color: #fca5a5; }
+    .restore-msg[hidden] { display: none; }
+    .restore-msg ul { margin: 0.2rem 0 0 1.1rem; padding: 0; }
+
+    /* 上書き確認ダイアログ */
+    #confirmdlg { max-width: min(26rem, calc(100vw - 2rem)); }
+    .confirm-text { font-size: 0.875rem; line-height: 1.6; margin: 0.25rem 0 0.5rem; }
+    .confirm-list { margin: 0 0 0.6rem 1.1rem; padding: 0; font-size: 0.875rem; font-weight: 700; }
+    .confirm-list small { font-weight: 400; color: var(--muted); margin-left: 0.3rem; }
+    .confirm-warn { font-size: 0.75rem; color: #fca5a5; margin-bottom: 0.75rem; }
+    .confirm-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
     .chip {
       display: inline-flex;
       align-items: center;
@@ -540,7 +562,7 @@
     .lv-num { flex: none; font-size: 0.75rem; font-weight: 700; color: var(--accent); line-height: 1; }
     /* Lv表示：★。星1つにつきLv2段階分（輪郭が光る → 完全に点灯）。最大Lv7なら星3つ、Lv3なら星1つ。 */
     .pips { display: flex; gap: 1px; }
-    .pips svg.st { width: 0.8rem; height: 0.8rem; display: block; overflow: visible; }
+    .pips svg.st { width: 0.98rem; height: 0.98rem; flex: none; display: block; overflow: visible; }
     .pips .star { fill: #57534e; stroke: #292524; stroke-width: 1; stroke-linejoin: round; }
     .pips .star.half { fill: url(#star-grad-half); stroke: #f59e0b; stroke-width: 1; filter: drop-shadow(0 0 1px rgba(245, 158, 11, 0.45)); }
     .pips .star.full { fill: url(#star-grad); stroke: #f59e0b; stroke-width: 1; filter: drop-shadow(0 0 2px rgba(250, 204, 21, 0.8)); }
@@ -552,19 +574,19 @@
        6スロット×3英雄がスマホの画面縦幅にも収まりやすい高さにする。
        17rem 以上のときは下の @container ブロックで通常サイズに戻す。 */
     .tool[data-mode="simple"] .slot {
-      grid-template-columns: 2.25rem minmax(0, 1fr);
+      grid-template-columns: 2.45rem minmax(0, 1fr);
       grid-template-areas: "img name" "img eff";
       justify-items: start;
       align-items: center;
-      column-gap: 0.45rem;
+      column-gap: 0.25rem;
       row-gap: 0.05rem;
       padding: 0.26rem 0.4rem 0.26rem 0.3rem;
       text-align: left;
     }
-    .tool[data-mode="simple"] .slot-media { align-items: flex-start; }
+    .tool[data-mode="simple"] .slot-media { align-items: center; }
     .tool[data-mode="simple"] .slot-img { max-width: 2.25rem; }
     .tool[data-mode="simple"] .pips { gap: 0; }
-    .tool[data-mode="simple"] .pips svg.st { width: 0.8rem; height: 0.8rem; }
+    .tool[data-mode="simple"] .pips svg.st { width: 0.92rem; height: 0.92rem; }   /* 画像の幅よりわずかに広いが、右の余白に収まる */
     .tool[data-mode="simple"] .slot-name {
       font-size: 0.625rem; justify-content: flex-start; flex-wrap: nowrap;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -608,7 +630,7 @@
       .tool[data-mode="simple"] .slot-media { align-items: center; }
       .tool[data-mode="simple"] .slot-img { max-width: none; width: 100%; }
       .tool[data-mode="simple"] .lv-num { font-size: 0.8125rem; }
-      .tool[data-mode="simple"] .pips svg.st { width: 0.9rem; height: 0.9rem; }
+      .tool[data-mode="simple"] .pips svg.st { width: 1.1rem; height: 1.1rem; }
     }
 
     /* =========================================================
@@ -749,14 +771,15 @@
       box-shadow: inset 0 0 12px rgba(34, 211, 238, 0.25);
     }
     .tool[data-mode="game"] .slot-img.has-img { border-style: solid; }
-    .tool[data-mode="game"] .slot-eff b { font-size: 0.875rem; font-weight: 800; column-gap: 0.25rem; }
+    .tool[data-mode="game"] .slot-eff b { font-size: 0.875rem; font-weight: 800; flex-direction: column; align-items: center; row-gap: 0.15rem; }
+    .tool[data-mode="game"] .eff-name { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .tool[data-mode="game"] .slot-eff small { display: none; }
     .tool[data-mode="game"] .lv-num { font-size: 0.6875rem; }
 
     .tool[data-mode="game"] .build-foot { grid-column: 1 / -1; grid-row: 5; margin-top: 0.25rem; }
     .tool[data-mode="game"] .edit-bar { border-color: rgba(253, 224, 71, 0.6); background: rgba(8, 47, 73, 0.6); }
 
-    /* ---------- 秘石ピッカー / JSON表示 / トースト ---------- */
+    /* ---------- 秘石ピッカー / コピー内容表示 / トースト ---------- */
     dialog {
       color: var(--text);
       background: #0f172a;
@@ -986,9 +1009,19 @@
   <dialog id="picker" aria-labelledby="pk-title"><div class="dlg-body" id="pk-body"></div></dialog>
   <dialog id="jsonbox" aria-labelledby="jb-title">
     <div class="dlg-body">
-      <div class="dlg-head"><span class="dlg-title" id="jb-title">JSON</span><button type="button" class="btn-sm" data-close>閉じる</button></div>
+      <div class="dlg-head"><span class="dlg-title" id="jb-title">コピー内容</span><button type="button" class="btn-sm" data-close>閉じる</button></div>
       <p class="pk-none-hint" style="margin-bottom:.4rem">自動コピーができませんでした。下の内容を選択してコピーしてください。</p>
       <textarea class="json-text" id="json-text" readonly></textarea>
+    </div>
+  </dialog>
+  <dialog id="confirmdlg" aria-labelledby="cf-title">
+    <div class="dlg-body">
+      <div class="dlg-head"><span class="dlg-title" id="cf-title">復元の確認</span></div>
+      <div id="confirm-body"></div>
+      <div class="confirm-actions">
+        <button type="button" class="btn-sm" data-ans="cancel">キャンセル</button>
+        <button type="button" class="btn-sm btn-accent" data-ans="ok">上書きして復元</button>
+      </div>
     </div>
   </dialog>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
@@ -1295,7 +1328,7 @@ function editBarHTML(h) {
     <span class="edit-tag">✎ 自分で選ぶ：枠を押して秘石とLvを選べます（自動保存）</span>
     ${copyFrom}
     <button type="button" class="btn-sm" data-act="reset" data-hero="${hn}">リセット</button>
-    <button type="button" class="btn-sm btn-accent" data-act="copy-hero" data-hero="${hn}">この英雄をJSONコピー</button>
+    <button type="button" class="btn-sm btn-accent" data-act="copy-hero" data-hero="${hn}">この英雄をテキストコピー</button>
   </div>`;
 }
 
@@ -1341,7 +1374,19 @@ function panelHTML(heroes, n) {
     ${checks}
     <div class="hero-filter">
       <span class="filter-label">表示する英雄</span>${chips}
-      <button type="button" class="btn-sm btn-accent copy-team" data-act="copy-team" data-team="${n}" title="この編成の3英雄について、「自分で選ぶ」の内容をJSONでコピーします">この編成をJSONコピー</button>
+      <div class="filter-actions">
+        <button type="button" class="btn-sm btn-accent copy-team" data-act="copy-team" data-team="${n}" title="この編成の3英雄について、各英雄で選択中のプリセットの秘石をコピーします">この編成をテキストコピー</button>
+        <button type="button" class="btn-sm" data-act="restore-toggle" aria-expanded="false" title="コピーした内容を貼り付けて、「自分で選ぶ」に復元します">コピペから復元</button>
+      </div>
+    </div>
+    <div class="restore-box" hidden>
+      <p class="restore-hint">コピーした内容をここに貼り付けてください。貼り付けた英雄の「✎ 自分で選ぶ」が上書きされます（実行前に確認が出ます）。</p>
+      <textarea class="json-text restore-text" spellcheck="false" placeholder="フランカ&#10;砲撃の嵐 Lv7 / 補足不能 Lv7 / 戦場洞察 Lv7 / 補足不能 Lv7 / 戦場洞察 Lv7 / 補足不能 Lv7&#10;&#10;ミヤ&#10;…"></textarea>
+      <div class="restore-msg" role="alert" hidden></div>
+      <div class="restore-actions">
+        <button type="button" class="btn-sm" data-act="restore-close">閉じる</button>
+        <button type="button" class="btn-sm btn-accent" data-act="restore-run">復元する</button>
+      </div>
     </div>
     <div class="hero-grid">${cards}</div>
     <p class="hero-empty">表示する英雄を1体以上選んでください。</p>
@@ -1455,7 +1500,7 @@ function renderPicker() {
     </button>`).join('');
   const lvBtns = max
     ? Array.from({ length: max }, (_, i) => `<button type="button" data-pk="lv:${i + 1}" data-lv="${i + 1}" aria-pressed="${i + 1 === curLv}">Lv${i + 1}</button>`).join('')
-    : '<span class="pk-none-hint">秘石を選ぶとレベルを選べます。</span>';
+    : '<span class="pk-none-hint">秘石を選ぶとレベルを選べます。アルファベット評価はLv3基準の評価です。</span>';
 
   document.getElementById('pk-body').innerHTML = `
     <div class="dlg-head">
@@ -1568,7 +1613,7 @@ function renderTips(name) {
     </div>
     ${descHTML}
     <div class="dlg-sub-row">
-      <p class="dlg-sub">秘石ごとの評価</p>
+      <p class="dlg-sub">秘石ごとの評価（Lv3基準）</p>
       <div class="tip-sort" role="group" aria-label="並べ替え">
         <button type="button" class="btn-sm${tipSortMode === 'grade' ? ' btn-accent' : ''}" data-sort="grade">評価が高い順</button>
         <button type="button" class="btn-sm${tipSortMode === 'slot' ? ' btn-accent' : ''}" data-sort="slot">部位順</button>
@@ -1586,18 +1631,109 @@ tipsDlg.addEventListener('click', e => {
   if (sortBtn && currentTipHero) { tipSortMode = sortBtn.dataset.sort; renderTips(currentTipHero); }
 });
 
-/* ---------- JSON コピー ----------
-   出力は TEAMS にそのまま貼れる形式（slots は [効果名, Lv] / 未設定は null）。 */
-const EXPORT_LABEL = 'おすすめ';
-const exportHero = h => ({ name: h.name, builds: [{ label: EXPORT_LABEL, note: '', slots: normSlots(getEdit(h.name)) }] });
-const exportTeam = n => ({ team: n, heroes: TEAMS[n - 1].map(exportHero) });
+/* ---------- コピー / 復元 ----------
+   形式（見やすさ重視のテキスト）:
+     英雄名
+     ライフル / アーマー / 視野 / ヘッドセット / ハンディGPS / ブーツ の順に「効果名 LvN」を ' / ' 区切り（未設定は「未設定」）
+     （空行）
+     次の英雄 …
+   復元では、この形式に加えて以前のJSON形式も読み込める。 */
+const EMPTY_LABEL = '未設定';
+// 英雄カードで今選択中のプリセット（タブ）を返す。タブが無い英雄は先頭（= 唯一）のプリセット
+function selectedBuild(card, h) {
+  const list = buildsOf(h);
+  const radios = card ? [...card.querySelectorAll('.build-radio')] : [];
+  return list[Math.max(0, radios.findIndex(r => r.checked))] || list[list.length - 1];
+}
+const exportHero = (h, card) => {
+  const b = selectedBuild(card, h);
+  return `${h.name}\n${normSlots(b.slots).map(sl => sl ? `${sl[0]} Lv${sl[1]}` : EMPTY_LABEL).join(' / ')}`;
+};
+const exportTeam = (n, panel) => {
+  const cards = panel.querySelectorAll('.hero-card');
+  return TEAMS[n - 1].map((h, i) => exportHero(h, cards[i])).join('\n\n');
+};
 
-function toJSONText(obj) {
-  // 短い配列（スロット）は1行にまとめて読みやすくする
-  return JSON.stringify(obj, null, 2).replace(
-    /\[\s*((?:"(?:[^"\\]|\\.)*"|\d+)(?:\s*,\s*(?:"(?:[^"\\]|\\.)*"|\d+))*)\s*\]/g,
-    (_, inner) => '[' + inner.replace(/\s*\n\s*/g, ' ') + ']'
-  );
+// ---- 読み取り ----
+// 全角/半角・空白・大文字小文字の違いを吸収して比較する
+const nk = str => String(str).normalize('NFKC').replace(/\s+/g, '').toLowerCase();
+const HERO_BY_KEY = {};
+Object.keys(HERO_INDEX).forEach(n => { HERO_BY_KEY[nk(n)] = n; });
+const EMPTY_KEYS = new Set([nk(EMPTY_LABEL), 'なし', '空', '-', 'ー', '―', '—', 'null', 'none']);
+
+function checkSlot(i, name, lv) {
+  const def = SLOTS[i];
+  const eff = def.effects.find(e => nk(e[0]) === nk(name));
+  if (!eff) return { error: `${def.label}に「${name}」はありません` };
+  const n = Number(lv);
+  if (!Number.isInteger(n) || n < 1 || n > eff[2]) return { error: `${def.label}「${eff[0]}」のLvは1〜${eff[2]}で指定してください` };
+  return { slot: [eff[0], n] };
+}
+
+function parseStoneLine(line) {
+  const tokens = line.split(/\s*[\/／,，、|｜]\s*/);
+  if (tokens.length === 1 && !EMPTY_KEYS.has(nk(line))) {
+    return { errors: [`「${line}」は英雄名としても秘石の並びとしても読み取れません`] };
+  }
+  if (tokens.length !== SLOTS.length) return { errors: [`秘石が${tokens.length}個あります（${SLOTS.length}個必要です）`] };
+  const slots = [], errors = [];
+  tokens.forEach((tk, i) => {
+    const key = nk(tk);
+    if (EMPTY_KEYS.has(key)) { slots.push(null); return; }
+    const m = key.match(/^(.+?)(?:lv\.?)?(\d+)$/);
+    if (!m) { errors.push(`${SLOTS[i].label}「${tk.trim()}」はLvが読み取れません（例：戦場洞察 Lv3）`); slots.push(null); return; }
+    const r = checkSlot(i, m[1], m[2]);
+    if (r.error) { errors.push(r.error); slots.push(null); } else slots.push(r.slot);
+  });
+  return { slots, errors };
+}
+
+function parseJSONRestore(text) {
+  let obj;
+  try { obj = JSON.parse(text); } catch (e) { return { found: {}, errors: ['JSONとして読み取れません'] }; }
+  const list = Array.isArray(obj) ? obj : (Array.isArray(obj.heroes) ? obj.heroes : (obj && obj.name ? [obj] : []));
+  const found = {}, errors = [];
+  list.forEach(h => {
+    const name = h && HERO_BY_KEY[nk(h.name || '')];
+    if (!name) { errors.push(`英雄「${h && h.name}」は見つかりません`); return; }
+    const raw = h.builds && h.builds[0] ? h.builds[0].slots : h.slots;
+    if (!Array.isArray(raw) || raw.length !== SLOTS.length) { errors.push(`${name}：秘石が${SLOTS.length}個ありません`); return; }
+    const slots = raw.map((e, i) => {
+      if (!e) return null;
+      const r = checkSlot(i, e[0], e[1]);
+      if (r.error) errors.push(`${name}：${r.error}`);
+      return r.slot || null;
+    });
+    found[name] = slots;
+  });
+  return { found, errors };
+}
+
+function parseRestoreText(text) {
+  const t = text.trim();
+  if (!t) return { found: {}, errors: ['貼り付け欄が空です'] };
+  if (/^[\[{]/.test(t)) return parseJSONRestore(t);
+  const found = {}, errors = [];
+  let cur = null;
+  text.split(/\r?\n/).forEach((raw, ln) => {
+    const line = raw.trim();
+    if (!line) return;
+    const hero = HERO_BY_KEY[nk(line.replace(/[:：]\s*$/, ''))];
+    if (hero) {
+      if (hero in found) { errors.push(`${ln + 1}行目：${hero}が重複しています`); cur = '__dup'; }
+      else { found[hero] = null; cur = hero; }
+      return;
+    }
+    if (cur === '__dup') return;
+    if (!cur) { errors.push(`${ln + 1}行目：英雄名が先に必要です`); return; }
+    if (found[cur]) { errors.push(`${ln + 1}行目：${cur}の秘石の行が2つあります`); return; }
+    const r = parseStoneLine(line);
+    r.errors.forEach(er => errors.push(`${ln + 1}行目（${cur}）：${er}`));
+    found[cur] = r.slots || [];
+  });
+  Object.keys(found).forEach(n => { if (found[n] === null) { errors.push(`${n}の秘石の行がありません`); } });
+  if (!Object.keys(found).length && !errors.length) errors.push('英雄名が見つかりません');
+  return { found, errors };
 }
 
 function legacyCopy(text) {
@@ -1620,8 +1756,7 @@ function toast(msg) {
   toastTimer = setTimeout(() => { el.hidden = true; }, 2400);
 }
 
-async function copyJSON(obj, message) {
-  const text = toJSONText(obj);
+async function copyText(text, message) {
   let ok = false;
   try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = legacyCopy(text); }
   if (ok) { toast(message); return; }
@@ -1633,6 +1768,91 @@ async function copyJSON(obj, message) {
 document.getElementById('jsonbox').addEventListener('click', e => {
   if (e.target.id === 'jsonbox' || e.target.hasAttribute('data-close')) e.target.closest('dialog').close();
 });
+
+/* ---------- 貼り付けからの復元 ---------- */
+const confirmDlg = document.getElementById('confirmdlg');
+
+function confirmOverwrite(names) {
+  const rows = names.map(n => {
+    const has = getEdit(n).some(Boolean);
+    return `<li>${esc(n)}${has ? '<small>（現在の内容は失われます）</small>' : '<small>（現在は未設定）</small>'}</li>`;
+  }).join('');
+  document.getElementById('confirm-body').innerHTML = `
+    <p class="confirm-text">次の英雄の「✎ 自分で選ぶ」を、貼り付けた内容で<b>上書き</b>します。</p>
+    <ul class="confirm-list">${rows}</ul>
+    <p class="confirm-warn">この操作は元に戻せません。</p>`;
+  return new Promise(resolve => {
+    confirmDlg.returnValue = '';
+    confirmDlg.addEventListener('close', () => resolve(confirmDlg.returnValue === 'ok'), { once: true });
+    confirmDlg.showModal();
+  });
+}
+confirmDlg.addEventListener('click', e => {
+  const btn = e.target.closest('[data-ans]');
+  if (btn) { confirmDlg.close(btn.dataset.ans); return; }
+  if (e.target === confirmDlg) confirmDlg.close('cancel');
+});
+
+function toggleRestore(panel, btn) {
+  const box = panel.querySelector('.restore-box');
+  box.hidden = !box.hidden;
+  btn.setAttribute('aria-expanded', String(!box.hidden));
+  if (!box.hidden) panel.querySelector('.restore-text').focus();
+}
+function closeRestore(panel) {
+  panel.querySelector('.restore-box').hidden = true;
+  panel.querySelector('[data-act="restore-toggle"]').setAttribute('aria-expanded', 'false');
+}
+function showEditMsg(panel, errors) {
+  const msg = panel.querySelector('.restore-msg');
+  msg.textContent = '';
+  if (!errors.length) { msg.hidden = true; return; }
+  msg.append('復元できませんでした。内容を確認してください（何も上書きしていません）。');
+  const ul = document.createElement('ul');
+  errors.slice(0, 8).forEach(er => { const li = document.createElement('li'); li.textContent = er; ul.append(li); });
+  if (errors.length > 8) { const li = document.createElement('li'); li.textContent = `…ほか${errors.length - 8}件`; ul.append(li); }
+  msg.append(ul);
+  msg.hidden = false;
+}
+// 復元した英雄は「自分で選ぶ」タブに切り替えて見せる
+function showEditTab(name) {
+  document.querySelectorAll('.build.is-edit').forEach(el => {
+    if (el.dataset.hero !== name) return;
+    const radios = el.closest('.hero-card').querySelectorAll('.build-radio');
+    if (radios.length) radios[radios.length - 1].checked = true;
+  });
+}
+
+async function runRestore(panel) {
+  const ta = panel.querySelector('.restore-text');
+  const { found, errors } = parseRestoreText(ta.value);
+  const names = Object.keys(found);
+  if (errors.length || !names.length) { showEditMsg(panel, errors.length ? errors : ['復元できる英雄がありません']); return; }
+  showEditMsg(panel, []);
+  if (!(await confirmOverwrite(names))) return;
+  names.forEach(n => { edits[n] = found[n]; });
+  saveEdits();
+  names.forEach(n => { refreshEdit(n); showEditTab(n); });
+  showRestored(names);
+  ta.value = '';
+  closeRestore(panel);
+  toast(`${names.join('・')}の「自分で選ぶ」を復元しました`);
+}
+
+// 復元後の表示切り替え。
+//  ・復元した英雄が表示されていない編成は、表示を「復元した英雄」だけに切り替える
+//  ・表示する編成は、貼り付けた内容の末尾の英雄の編成（複数の編成を同時に復元したとき用）
+function showRestored(names) {
+  const byTeam = {};
+  names.forEach(n => { const t = HERO_INDEX[n].team; (byTeam[t] = byTeam[t] || []).push(n); });
+  Object.keys(byTeam).forEach(t => {
+    const heroes = TEAMS[t - 1];
+    const checks = heroes.map((_, i) => document.getElementById(`t${t}h${i}`));
+    const want = heroes.map(h => byTeam[t].includes(h.name));
+    if (want.some((w, i) => w && !checks[i].checked)) checks.forEach((c, i) => { c.checked = want[i]; });
+  });
+  document.getElementById(`team-${HERO_INDEX[names[names.length - 1]].team}`).checked = true;
+}
 
 /* ---------- イベント ---------- */
 document.addEventListener('click', e => {
@@ -1647,8 +1867,11 @@ document.addEventListener('click', e => {
   const hero = act.dataset.hero;
   switch (act.dataset.act) {
     case 'reset':     resetEdit(hero); toast(`${hero}の「自分で選ぶ」をリセットしました`); break;
-    case 'copy-hero': copyJSON({ team: HERO_INDEX[hero].team, heroes: [exportHero(HERO_INDEX[hero].hero)] }, `${hero}の編集内容をコピーしました`); break;
-    case 'copy-team': copyJSON(exportTeam(parseInt(act.dataset.team, 10)), `P${act.dataset.team} の編集内容をコピーしました`); break;
+    case 'copy-hero': copyText(exportHero(HERO_INDEX[hero].hero, act.closest('.hero-card')), `${hero}の秘石をコピーしました`); break;
+    case 'copy-team': copyText(exportTeam(parseInt(act.dataset.team, 10), act.closest('.team-panel')), `P${act.dataset.team} の選択中のプリセットをコピーしました`); break;
+    case 'restore-toggle': toggleRestore(act.closest('.team-panel'), act); break;
+    case 'restore-close':  closeRestore(act.closest('.team-panel')); break;
+    case 'restore-run':    runRestore(act.closest('.team-panel')); break;
   }
 });
 
