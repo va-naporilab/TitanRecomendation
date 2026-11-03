@@ -1500,14 +1500,14 @@ function renderPicker() {
     </button>`).join('');
   const lvBtns = max
     ? Array.from({ length: max }, (_, i) => `<button type="button" data-pk="lv:${i + 1}" data-lv="${i + 1}" aria-pressed="${i + 1 === curLv}">Lv${i + 1}</button>`).join('')
-    : '<span class="pk-none-hint">秘石を選ぶとレベルを選べます。アルファベット評価はLv3基準の評価です。</span>';
+    : '<span class="pk-none-hint">秘石を選ぶとレベルを選べます。</span>';
 
   document.getElementById('pk-body').innerHTML = `
     <div class="dlg-head">
       <span class="dlg-title" id="pk-title">${esc(pk.hero)}／${icon(def.key)} ${esc(def.label)}</span>
       <button type="button" class="btn-sm btn-accent" data-close data-pk="close">完了</button>
     </div>
-    <p class="dlg-sub">秘石</p>
+    <p class="dlg-sub">選択可能な秘石（アルファベット評価はLv3基準の評価です）</p>
     <div class="pk-list">
       ${effBtns}
       <button type="button" class="pk-eff pk-none" data-pk="none" data-eff="" aria-pressed="${!curEff}"><b>未設定にする</b></button>
